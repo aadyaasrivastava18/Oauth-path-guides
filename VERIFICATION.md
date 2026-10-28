@@ -2,7 +2,7 @@
 
 This file records what was checked, what was corrected, and what could not be verified. Fill in the tables as you verify; leave a row as "Could not verify" rather than guessing.
 
-## 1. What automated tests cover (offline, 40 tests)
+## 1. What automated tests cover (offline, 43 tests)
 
 Gemini, Tavily and Jina are replaced by fakes. These parts run for real: quote verification, rule-based grading, assembly, the endpoint prober (against a mock HTTP server), SSRF guard, store, rate limiter, web routes, streaming, and HTML escaping.
 
@@ -32,7 +32,7 @@ For each guide you plan to show, open the provider's real developer console or d
 | Gmail | Restricted-scope verification and security assessment | | | |
 | LinkedIn | Partner program / approval requirement | | | |
 
-Also check, for any guide: authorization and token URLs, redirect URI rules, and the grade shown.
+Also check, for any guide: authorisation and token URLs, redirect URI rules, and the grade shown.
 
 ## 3. Live-generation spot checks
 
