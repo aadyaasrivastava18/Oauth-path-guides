@@ -3,6 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,6 +34,16 @@ class Settings(BaseSettings):
     daily_generation_cap: int = 60
     max_concurrent_generations: int = 2
     trust_proxy: bool = False
+
+    @field_validator("gemini_api_key", "gemini_models", "tavily_api_key", "jina_api_key", "composio_api_key",
+                     "supabase_url", "supabase_service_key", mode="after")
+    @classmethod
+    def _placeholder_means_unset(cls, v: str) -> str:
+        """'xxxx' (the template value) and similar placeholders count as not set."""
+        t = v.strip()
+        if not t or set(t.lower()) <= {"x"} or t.lower() in {"your-key", "your_key", "your-key-here", "changeme", "none", "null"}:
+            return ""
+        return t
 
     @property
     def models_list(self) -> list[str]:
