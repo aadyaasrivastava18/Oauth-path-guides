@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ev, grade, claim_list %}
+{% block title %}{{ guide.app_name }} OAuth setup guide | OAuth path guides{% endblock %}
+{% block content %}
+{% set c = guide.evidence_counts() %}
+{% set total = c.tested + c.docs + c.inferred + c.unverified %}
+<article class="guide" data-slug="{{ guide.slug }}">
+  <header class="guide-head">
+    {{ grade(guide.tier, 'xl') }}
+    <div>
+      <h1>{{ guide.app_name }}</h1>
+      <p class="grade-line"><strong>{{ guide.tier_label }}</strong>
+        {% if guide.tier %}<span class="muted">· grade {{ guide.tier }} of 4 · {{ guide.tier_confidence }} confidence</span>{% endif %}</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="share-btn">Copy link</button>
+      <a class="btn" href="/api/guides/{{ guide.slug }}">JSON</a>
+    </div>
+  </header>
+
+  {% if guide.summary %}<p class="lede">{{ guide.summary }}</p>{% endif %}
+  {% if guide.status != 'ok' %}<p class="notice" role="note">{{ guide.status_note }}</p>{% endif %}
+  <p class="meta">
+    {% if guide.hand_verified %}<span class="tag ok">Hand-verified</span>{% else %}<span class="tag">Not yet hand-verified</span>{% endif %}
+    Generated {{ guide.generated_at[:10] }} by {{ guide.generator }}.
+    {% if guide.website %}Provider site: <a href="{{ guide.website }}" target="_blank" rel="noopener noreferrer nofollow">{{ guide.website }}</a>{% endif %}
+  </p>
+
+  <section class="glance" aria-label="At a glance">
+    <div>
+      <h3>Need your own OAuth app?</h3>
+      {% if guide.need_own_app %}<p>{{ guide.need_own_app.text }}</p>{{ ev(guide.need_own_app.evidence) }}{% else %}<p>Unknown.</p>{% endif %}
+    </div>
+    <div>
+      <h3>Setup effort (yours)</h3>
+      {% if guide.setup_effort %}<p class="big">{{ guide.setup_effort.label }}</p>{{ ev(guide.setup_effort.evidence) }}{% else %}<p class="big">Unknown</p>{% endif %}
+    </div>
+    <div>
+      <h3>Approval wait (theirs)</h3>
+      {% if guide.approval_wait %}<p class="big">{{ guide.approval_wait.label }}</p>{{ ev(guide.approval_wait.evidence) }}{% else %}<p class="big">Unknown</p>{% endif %}
+      {% if guide.approval_wait_stated %}<p class="stated">{{ guide.approval_wait_stated.text }}</p>{{ ev(guide.approval_wait_stated.evidence) }}{% endif %}
+    </div>
+    <div>
+      <h3>Evidence</h3>
+      <p class="big">{{ (guide.evidence_coverage() * 100)|round|int }}%</p>
+      <p class="muted small">of statements tested or confirmed in docs</p>
+      {% if total %}
+      {% set ns = namespace(x=0) %}
+      <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" role="img" aria-label="Tested {{ c.tested }}, docs {{ c.docs }}, inferred {{ c.inferred }}, unverified {{ c.unverified }}">
+        {% for k in ['tested','docs','inferred','unverified'] %}{% if c[k] %}{% set w = c[k] / total * 100 %}<rect class="seg-{{ k }}" x="{{ ns.x }}" y="0" width="{{ w }}" height="8"/>{% set ns.x = ns.x + w %}{% endif %}{% endfor %}
+      </svg>
+      <p class="muted small">{{ c.tested }} tested · {{ c.docs }} docs · {{ c.inferred }} inferred · {{ c.unverified }} unverified</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if guide.tier_reasons or guide.modifiers %}
+  <section>
+    <h2>Why this grade</h2>
+    <p class="muted">{{ tiers[guide.tier][1] }}</p>
+    {{ claim_list(guide.tier_reasons + guide.modifiers) }}
+  </section>
+  {% endif %}
+
+  {% if guide.next_actions %}
+  <section>
+    <h2>Start here</h2>
+    <ul class="checklist">
+      {% for a in guide.next_actions %}<li><label><input type="checkbox" data-check="{{ guide.slug }}:{{ loop.index }}"> <span>{{ a }}</span></label></li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Do you need your own OAuth app?</h2>
+    {% if guide.need_own_app %}{{ claim_list([guide.need_own_app] + ([guide.own_app_reasons] if guide.own_app_reasons else [])) }}{% endif %}
+    {% if guide.managed_auth.note %}<p class="muted small">{{ guide.managed_auth.note }}</p>{% endif %}
+  </section>
+
+  {% if guide.steps %}
+  <section>
+    <h2>Setup steps</h2>
+    <ol class="steps">
+      {% for s in guide.steps %}
+      <li>
+        <div class="step-head"><strong>{{ s.title }}</strong>
+          <span class="tag actor-{{ s.actor }}">{{ {'agent':'Agent can do','human':'You do','either':'Either'}[s.actor] }}</span></div>
+        {% if s.detail %}<p>{{ s.detail }}</p>{% endif %}
+        {% if s.url %}<p><a href="{{ s.url }}" target="_blank" rel="noopener noreferrer nofollow">{{ s.url[:90] }}</a></p>{% endif %}
+        {{ ev(s.evidence) }}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  {% set o = guide.oauth %}
+  {% if o.authorization_url or o.token_url or o.registration_url or o.redirect_uri_rules or o.scopes or o.scope_advice or guide.prerequisites %}
+  <section>
+    <h2>Requirements and details</h2>
+    {% if guide.prerequisites %}<h3>Before you start</h3>{{ claim_list(guide.prerequisites) }}{% endif %}
+    {% if o.authorization_url or o.token_url or o.registration_url or o.pkce_supported %}
+    <h3>Endpoints</h3>
+    <dl class="kv">
+      {% for label, f in [('Developer console', o.registration_url), ('Authorization URL', o.authorization_url), ('Token URL', o.token_url), ('PKCE', o.pkce_supported)] %}
+      {% if f %}<dt>{{ label }}</dt><dd>{% if f.value.startswith('http') %}<a href="{{ f.value }}" target="_blank" rel="noopener noreferrer nofollow"><code>{{ f.value }}</code></a>{% else %}{{ f.value }}{% endif %} {{ ev(f.evidence) }}</dd>{% endif %}
+      {% endfor %}
+    </dl>
+    {% endif %}
+    {% if o.redirect_uri_rules %}<h3>Redirect URI rules</h3>{{ claim_list(o.redirect_uri_rules) }}{% endif %}
+    {% if o.scopes or o.scope_advice %}<h3>Scopes</h3>{% if o.scope_advice %}{{ claim_list([o.scope_advice]) }}{% endif %}{{ claim_list(o.scopes) }}{% endif %}
+  </section>
+  {% endif %}
+
+  {% if guide.approval_requirements or guide.rejection_reasons %}
+  <section>
+    <h2>Approval</h2>
+    {% if guide.approval_requirements %}<h3>What they ask for</h3>{{ claim_list(guide.approval_requirements) }}{% endif %}
+    {% if guide.rejection_reasons %}<h3>Common reasons for rejection</h3>{{ claim_list(guide.rejection_reasons) }}{% endif %}
+  </section>
+  {% endif %}
+
+  {% if guide.blockers %}
+  <section>
+    <h2>If you get blocked</h2>
+    <ul class="claims">
+      {% for b in guide.blockers %}<li><span class="claim-text"><strong>{{ b.problem }}</strong>{% if b.what_to_do %}<br>{{ b.what_to_do }}{% endif %}</span>{{ ev(b.evidence) }}</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>What the agent does, and where you take over</h2>
+    <div class="split">
+      <div><h3>Agent</h3>{{ claim_list(guide.agent_can) }}</div>
+      <div><h3>You</h3>{{ claim_list(guide.human_must) }}</div>
+    </div>
+  </section>
+
+  {% if guide.drafts %}
+  <section>
+    <h2>Drafts to start from</h2>
+    {% for d in guide.drafts %}
+    <div class="draft">
+      <div class="step-head"><strong>{{ d.title }}</strong><button type="button" class="btn small" data-copy-target="draft-{{ loop.index }}">Copy</button></div>
+      <pre id="draft-{{ loop.index }}">{{ d.body }}</pre>
+      {{ ev(d.evidence) }}
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if guide.probes %}
+  <section>
+    <h2>What we tested</h2>
+    <p class="muted">Each request used a deliberately invalid client. Nothing was created or authenticated.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Check</th><th>Result</th><th>URL</th></tr></thead>
+      <tbody>
+        {% for p in guide.probes %}
+        <tr><td>{{ p.name }}</td><td><span class="dot {{ 'ok' if p.ok else 'bad' }}" aria-hidden="true"></span> {{ p.observed }}</td>
+            <td>{% if p.url %}<code>{{ p.url[:70] }}</code>{% endif %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Sources</h2>
+    {% if guide.sources %}
+    <ul class="sources">
+      {% for s in guide.sources %}
+      <li><span class="dot {{ 'ok' if s.fetched_ok else 'bad' }}" aria-hidden="true"></span>
+        {% if s.url %}<a href="{{ s.url }}" target="_blank" rel="noopener noreferrer nofollow">{{ s.title or s.url[:80] }}</a>{% endif %}
+        <span class="muted small">{{ 'likely official' if s.likely_official else 'third party' }}{% if not s.fetched_ok %} · could not be read ({{ s.note }}){% endif %}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">No sources were read.</p>{% endif %}
+  </section>
+
+  {% if guide.uncertainties %}
+  <section>
+    <h2>What is still uncertain</h2>
+    <ul class="plain">{% for u in guide.uncertainties %}<li>{{ u }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

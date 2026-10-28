@@ -1,0 +1,21 @@
+{% macro ev(e) %}
+<details class="ev ev-{{ e.level }}">
+  <summary>{{ {'tested':'Tested','docs':'Docs','inferred':'Inferred','unverified':'Unverified'}[e.level] }}</summary>
+  <div class="ev-body">
+    {% if e.quote %}<blockquote>{{ e.quote }}</blockquote>{% endif %}
+    {% if e.source_url %}<p><a href="{{ e.source_url }}" target="_blank" rel="noopener noreferrer nofollow">{{ e.source_url[:80] }}</a></p>{% endif %}
+    {% if e.note %}<p>{{ e.note }}</p>{% endif %}
+    <p class="ev-def">{{ {'tested':'We observed this ourselves.','docs':'Quoted from a page we fetched, and the quote was found in that page.','inferred':'Model synthesis or an unconfirmed quote. Plausible, not confirmed.','unverified':'A heuristic or placeholder. Do not rely on it.'}[e.level] }}</p>
+  </div>
+</details>
+{% endmacro %}
+
+{% macro grade(tier, size='') %}
+<span class="grade grade-{{ tier }} {{ size }}" role="img" aria-label="{{ 'Difficulty grade ' ~ tier ~ ' of 4' if tier else 'Difficulty not determined' }}"></span>
+{% endmacro %}
+
+{% macro claim_list(items) %}
+<ul class="claims">
+  {% for c in items %}<li><span class="claim-text">{{ c.text }}</span>{{ ev(c.evidence) }}</li>{% endfor %}
+</ul>
+{% endmacro %}

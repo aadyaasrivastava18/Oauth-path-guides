@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import grade, ev %}
+{% block title %}How we rate | OAuth path guides{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1>How we rate</h1>
+  <h2>Grades</h2>
+  <p>The grade comes from fixed rules applied to facts the agent found in the provider's docs, not from the model's opinion. The same facts always produce the same grade, and every reason is listed on the guide with its evidence.</p>
+  <ul class="legend">
+    {% for t in [1,2,3,4] %}<li>{{ grade(t) }}<div><strong>{{ tiers[t][0] }}</strong><span>{{ tiers[t][1] }}</span></div></li>{% endfor %}
+  </ul>
+  <p>If the docs do not settle the key questions, the guide says “Not enough evidence” instead of guessing.</p>
+  <h2>Setup effort and approval wait are separate</h2>
+  <p>Setup effort is your work. Approval wait is time spent waiting on the provider. Treating them as one number hides the real risk, so every guide shows both.</p>
+  <h2>Evidence labels</h2>
+  <p>Every statement carries one label. Open it to see the quote or note behind it.</p>
+  <ul class="claims">
+    <li><span class="claim-text">Tested: we observed it ourselves, for example by sending a request to an OAuth endpoint with an invalid client and recording the response.</span></li>
+    <li><span class="claim-text">Docs: the model quoted a provider page, and we checked that the quote appears in the page we fetched.</span></li>
+    <li><span class="claim-text">Inferred: model synthesis, or a quote we could not find in the pages. Plausible, not confirmed.</span></li>
+    <li><span class="claim-text">Unverified: a heuristic. Time ranges are rules of thumb by grade, because providers rarely publish approval times.</span></li>
+  </ul>
+  <h2>What the agent does not do</h2>
+  <p>It never signs in to a provider, creates an app, or submits anything. Endpoint tests use a deliberately invalid client and send no credentials. Where a human must act (log in, verify a business, pay, submit), the guide says so.</p>
+  <h2>Hand-verified guides</h2>
+  <p>A guide marked “Hand-verified” was checked by a person against the provider's current console or docs. See the repository's VERIFICATION.md for what was corrected.</p>
+</article>
+{% endblock %}

@@ -1,0 +1,8 @@
+# One app per line (a name or a website). `python -m scripts.generate_library` builds a guide for each.
+# Chosen to span the difficulty range. Edit freely.
+GitHub
+Slack
+Gmail
+LinkedIn
+Notion
+Salesforce

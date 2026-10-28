@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import grade %}
+{% block content %}
+<section class="hero">
+  <h1>How hard is it to get an OAuth app approved?</h1>
+  <p class="lede">Before your agent's users can connect an app, you may need to register an OAuth app with the provider. Look one up to see the effort, the wait, what can block you, and what an agent can do for you.</p>
+  {% include "_search.html" %}
+</section>
+
+<section>
+  <h2>Library</h2>
+  {% if guides %}
+  <ul class="library">
+    {% for g in guides %}
+    <li>
+      <a href="/guide/{{ g.slug }}">
+        {{ grade(g.tier) }}
+        <span class="lib-name">{{ g.app_name }}</span>
+        <span class="lib-tier">{{ g.tier_label }}</span>
+        <span class="lib-time">{% if g.setup_effort %}Setup {{ g.setup_effort.label }}{% endif %}{% if g.approval_wait and g.approval_wait.max_minutes %}, wait {{ g.approval_wait.label }}{% endif %}</span>
+        {% if g.hand_verified %}<span class="tag ok">Hand-verified</span>{% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No guides in the library yet. Generate one above, or run <code>python -m scripts.generate_library</code> to build the starter set.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>The four grades</h2>
+  <ul class="legend">
+    {% for t in [1,2,3,4] %}<li>{{ grade(t) }}<div><strong>{{ tiers[t][0] }}</strong><span>{{ tiers[t][1] }}</span></div></li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

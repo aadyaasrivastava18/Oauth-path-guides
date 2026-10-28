@@ -1,0 +1,13 @@
+<form id="gen-form" class="search" autocomplete="off" {% if not live_enabled %}data-disabled="1"{% endif %}>
+  <label for="q">App name or website</label>
+  <div class="search-row">
+    <input id="q" name="q" type="text" maxlength="120" placeholder="HubSpot, or https://hubspot.com" value="{{ prefill|default('') }}" required>
+    <button type="submit" class="btn primary">Generate guide</button>
+  </div>
+  {% if not live_enabled %}<p class="hint warn">Live generation is switched off on this server. The pre-built guides below still work.</p>{% endif %}
+  <p class="hint">Not in the library? The agent reads the provider's docs, tests its OAuth endpoints, and builds a guide in about a minute. Try:
+    {% for e in examples %}<button type="button" class="chip" data-example="{{ e }}">{{ e }}</button>{% endfor %}
+  </p>
+  <ol id="progress" class="progress" aria-live="polite" hidden></ol>
+  <p id="error" class="error" role="alert" hidden></p>
+</form>

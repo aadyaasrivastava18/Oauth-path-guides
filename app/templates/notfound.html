@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not found | OAuth path guides{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>No guide here yet</h1>
+  <p class="lede">{% if slug %}There is no guide for “{{ slug }}”. {% endif %}{% if live_enabled %}Generate it now:{% else %}Browse the library instead.{% endif %}</p>
+  {% if live_enabled %}{% include "_search.html" %}{% else %}<p><a class="btn primary" href="/">Open the library</a></p>{% endif %}
+</section>
+{% endblock %}
