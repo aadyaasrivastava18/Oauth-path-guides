@@ -246,3 +246,38 @@ def test_pages_are_csp_compatible_no_inline_style_or_script(tmp_path):
         assert not re.search(r"<script(?![^>]*\ssrc=)[^>]*>", html), f"inline script on {path}"
         assert not re.search(r"\son\w+=", html), f"inline event handler on {path}"
     assert 'class="bar"' in c.get("/guide/acme").text
+
+
+def test_placeholder_values_count_as_unset():
+    st = Settings(gemini_api_key="xxxx", gemini_models="xxxx", tavily_api_key=" XXXXX ", jina_api_key="your-key-here",
+                  composio_api_key="real-key-123", _env_file=None)
+    assert st.gemini_api_key == "" and st.models_list == [] and st.tavily_api_key == "" and st.jina_api_key == ""
+    assert st.composio_api_key == "real-key-123"
+    assert Settings(gemini_models="models/a, b ,a", _env_file=None).models_list == ["a", "b"]
+
+
+def test_init_env_creates_placeholders_and_never_overwrites(tmp_path, monkeypatch):
+    import sys
+    import scripts.init_env as init_env
+
+    monkeypatch.setattr(init_env, "ROOT", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["init_env"])
+    assert init_env.main() == 0
+    text = (tmp_path / ".env").read_text()
+    assert "GEMINI_API_KEY=xxxx" in text and "AIza" not in text
+    (tmp_path / ".env").write_text("GEMINI_API_KEY=real")
+    init_env.main()
+    assert (tmp_path / ".env").read_text() == "GEMINI_API_KEY=real"
+    parsed = Settings(_env_file=str(tmp_path / ".env"))
+    assert parsed.gemini_api_key == "real"
+
+
+def test_env_example_lists_every_setting():
+    """Guards against drift: every Settings field must appear in env.example (commented or not)."""
+    import re
+    from pathlib import Path
+    text = (Path(__file__).resolve().parent.parent / "env.example").read_text()
+    listed = set(re.findall(r"^#?\s*([A-Z][A-Z0-9_]+)=", text, re.M))
+    expected = {name.upper() for name in Settings.model_fields}
+    assert expected <= listed, f"missing from env.example: {sorted(expected - listed)}"
+    assert not re.search(r"AIza|tvly-|sk-[A-Za-z0-9]{10}", text), "looks like a real key in env.example"
