@@ -1,8 +1,8 @@
 # OAuth path guides
 
-**Live app:** `<PASTE URL>`  |  **Repo:** `<PASTE URL>`  |  **Verification notes:** [VERIFICATION.md](VERIFICATION.md)
+**Live app:** `<PASTE URL>`  |  **Repo:** `https://github.com/aadyaasrivastava18/Oauth-path-guides`  |  **Verification notes:** [VERIFICATION.md](VERIFICATION.md)
 
-A developer building an AI agent needs their users to connect an app. First they may have to register an OAuth app with the provider and get it approved, and today nobody can tell whether that is an hour or weeks. This tool answers that: look up an app (or type any app name or website) and get a shareable guide that says **how hard it is, how long it takes, what can block you, and what an agent can do versus what you must do**. Every statement is labelled with how well it is supported.
+A developer building an AI agent needs their users to connect an app. First, they may have to register an OAuth app with the provider and get it approved, and today nobody can tell whether that is an hour or weeks. This tool answers that: look up an app (or type any app name or website) and get a shareable guide that says **how hard it is, how long it takes, what can block you, and what an agent can do versus what you must do**. Every statement is labelled with how well it is supported.
 
 ## What it does
 
