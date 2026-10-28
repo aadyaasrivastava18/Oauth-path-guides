@@ -15,8 +15,13 @@ def line(status: str, name: str, detail: str = "") -> None:
 
 
 async def main() -> int:
+    from agent.config import ROOT
+
     s = get_settings()
     failed = 0
+    if not (ROOT / ".env").exists():
+        line(BAD, ".env file", "not found. Run `python -m scripts.init_env`, then put your real keys in it.")
+        failed += 1
 
     # Gemini: test each configured model separately (quotas are per model)
     if not (s.gemini_api_key and s.models_list):
